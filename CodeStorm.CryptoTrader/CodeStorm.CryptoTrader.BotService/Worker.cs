@@ -1,3 +1,4 @@
+using CodeStorm.CryptoTrader.Application;
 using CodeStorm.CryptoTrader.Application.ApplicationServices;
 
 namespace CodeStorm.CryptoTrader.BotService
@@ -27,7 +28,7 @@ namespace CodeStorm.CryptoTrader.BotService
                         _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                     }
 
-                    await realTimeIndicatorService.GetLatestOHLC();
+                    await realTimeIndicatorService.GetLatestOHLCForFwog();
 
                     await Task.Delay(5000, stoppingToken);
                 }

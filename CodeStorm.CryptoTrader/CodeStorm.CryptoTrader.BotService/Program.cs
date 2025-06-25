@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddScoped<ResponseRepository>();
+builder.Services.AddScoped<TimelineAnalysisRepository>();
 builder.Services.AddScoped<RealTimeIndicatorService>();
 builder.Services.AddScoped<CryptoTraderDbContext>();
 builder.Services.AddHttpClient();

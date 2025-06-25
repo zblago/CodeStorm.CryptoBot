@@ -24,5 +24,36 @@ namespace CodeStorm.CryptoTrader.Repository.Repository
 
             await _cryptoTraderDbContext.SaveChangesAsync();
         }
+
+        public async Task AddOhlc(decimal latestRsi,
+            string cryptCurrencyType,
+            int timestampInteger,
+            DateTime timeStampUtc,
+            decimal open,
+            decimal high,
+            decimal low,
+            decimal close,
+            decimal vwap,
+            decimal volume,
+            int count)
+        {
+            _cryptoTraderDbContext.Add(new Ohlc
+            {
+                LatestRsi = latestRsi,
+                CryptoCurrencyType = cryptCurrencyType,
+                TimeStampInteger = timestampInteger,
+                TimeStampUtc = DateTimeOffset.FromUnixTimeSeconds(timestampInteger).UtcDateTime,
+                Open = open,
+                High = high,
+                Low = low,
+                Close = close,
+                VWap = vwap,
+                Volume = volume,
+                Count = count,
+                CreatedOnUtC = timeStampUtc
+            });
+
+            await _cryptoTraderDbContext.SaveChangesAsync();
+        }
     }
 }

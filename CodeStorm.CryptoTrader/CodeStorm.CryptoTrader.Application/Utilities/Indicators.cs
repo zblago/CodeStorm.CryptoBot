@@ -112,7 +112,7 @@
             return Math.Round(rsi, 2); // return only final RSI like UI shows
         }
 
-        public static List<decimal?> CalculateStochRSI(List<decimal?> rsi, int stochPeriod = 14, int kSmoothing = 3, int dSmoothing = 3)
+        public static Tuple<decimal?, decimal?> CalculateStochRSI(List<decimal?> rsi, int stochPeriod = 14, int kSmoothing = 3, int dSmoothing = 3)
         {
             var stochRsi = new List<decimal?>();
             var percentK = new List<decimal?>();
@@ -161,11 +161,7 @@
                 percentD.Add(window.Average());
             }
 
-            // Print latest values like TradingView
-            Console.WriteLine($"%K (blue): {percentK.LastOrDefault() * 100:F2}");
-            Console.WriteLine($"%D (orange): {percentD.LastOrDefault() * 100:F2}");
-
-            return percentK; // Or return a tuple of %K and %D if you want
+            return new Tuple<decimal?, decimal?> (percentK.LastOrDefault() * 100, percentD.LastOrDefault() * 100); // Or return a tuple of %K and %D if you want
         }
 
     }

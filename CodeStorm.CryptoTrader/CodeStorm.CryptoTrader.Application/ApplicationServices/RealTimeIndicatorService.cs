@@ -1,8 +1,6 @@
 ﻿using CodeStorm.CryptoTrader.Application.Utilities;
 using CodeStorm.CryptoTrader.Repository.Repository;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Skender.Stock.Indicators;
 using System.Globalization;
 
 namespace CodeStorm.CryptoTrader.Application.ApplicationServices
@@ -10,19 +8,22 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
     public class RealTimeIndicatorService
     {
         private readonly ResponseRepository _responseRepository;
+        private readonly TimelineAnalysisRepository _timelineAnalysisRepository;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public RealTimeIndicatorService(ResponseRepository responseRepository, 
+        public RealTimeIndicatorService(ResponseRepository responseRepository,
+            TimelineAnalysisRepository timelineAnalysisRepository,
             IHttpClientFactory httpClientFactory) 
         { 
             _responseRepository = responseRepository;
             _httpClientFactory = httpClientFactory;
+            _timelineAnalysisRepository = timelineAnalysisRepository;
         }
 
-        public async Task GetLatestOHLC()
+        public async Task GetLatestOHLCForFwog()
         {
             var httpRequestMessage = new HttpRequestMessage
-                (HttpMethod.Get, "https://api.kraken.com/0/public/OHLC?pair=FWOGUSD&interval=15");
+                (HttpMethod.Get, $"https://api.kraken.com/0/public/OHLC?pair={CryptoCurrencyType.FWOGUSD }&interval=15");
 
             var httpClient = _httpClientFactory.CreateClient();
             var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
@@ -39,8 +40,6 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                     var lastCloseOhlcBasedOnIndex = ohlcResponse
                         .Result.FWOGUSD.FirstOrDefault(c => Convert.ToInt64(c[0]) == lastClosedIndex);
 
-                    List<Quote> quotes = new List<Quote>();
-
                     foreach (var ohlc in ohlcResponse.Result.FWOGUSD)
                     {
                         long timestamp = Convert.ToInt64(ohlc[0]);
@@ -55,17 +54,7 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                         if (timestamp > lastClosedIndex)
                         {
                             break;
-                        } 
-
-                        quotes.Add(new Quote
-                        {
-                            Date = DateTimeOffset.FromUnixTimeSeconds(timestamp).UtcDateTime,
-                            Open = open,
-                            High = high,
-                            Low = low,
-                            Close = close,
-                            Volume = volume
-                        });
+                        }
 
                         closePrices.Add(Convert.ToDecimal(ohlc[4], CultureInfo.InvariantCulture)); // Close price is at index 4
                     }
@@ -76,31 +65,15 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                     var rsi = Indicators.CalculateRSI(closePrices.ToList());
                     var stohasticRsi = Indicators.CalculateStochRSI(rsi);
 
-                    var stochRsiResults = StochRsiCalculator.CalculateStochRsi(closePrices.TakeLast(300).ToList());
-                    var latest = stochRsiResults.LastOrDefault(r => r.PercentK.HasValue && r.PercentD.HasValue);
-                    Console.WriteLine($"Latest %K = {latest.PercentK:F2}, %D = {latest.PercentD:F2}");
+                    // Print latest values like TradingView
+                    Console.WriteLine($"%K (blue): {stohasticRsi.Item1:F2}");
+                    Console.WriteLine($"%D (orange): {stohasticRsi.Item2:F2}");
 
+                    await _timelineAnalysisRepository.AddCurrentAnalysis(CryptoCurrencyType.FWOGUSD.ToString(),
+                        latestRsi ?? 0,
+                        k: stohasticRsi.Item1 ?? 0,
+                        d: stohasticRsi.Item2 ?? 0);
 
-                    var stochRsiResult2 = StochRsiCalculator2.CalculateStochasticRsi(closePrices, 14, 14, 3, 3);
-
-                    var stochRsiResult2Latest = stochRsiResult2.LastOrDefault(x => x.PercentD.HasValue);
-
-                    Console.WriteLine($"Latest RSI: {stochRsiResult2Latest?.Rsi:F2}");
-                    Console.WriteLine($"Latest %K: {stochRsiResult2Latest?.PercentK:F2}");
-                    Console.WriteLine($"Latest %D: {stochRsiResult2Latest?.PercentD:F2}");
-                    
-
-                    var results = quotes.GetStochRsi(14, 14, 3, 3);
-                    var latestStochRsi = results.LastOrDefault();
-
-                    Console.WriteLine($"%K: {latestStochRsi?.StochRsi.Value/100:P}");
-                    Console.WriteLine($"%D: {latestStochRsi?.Signal/100:P}");
-
-
-                    //var latest = stohasticRsi.LastOrDefault();
-                    //Console.WriteLine($"StochRSI: {latest?.StochRsi:P}");
-                    //Console.WriteLine($"%K: {latest?.PercentK:P}");
-                    //Console.WriteLine($"%D: {latest?.PercentD:P}");
                     //await _responseRepository.AddResponse(jsonResponse);
                 }
             }
