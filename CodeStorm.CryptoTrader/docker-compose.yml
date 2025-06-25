@@ -1,0 +1,19 @@
+services:
+  codestorm.cryptotrader.botservice:
+    image: ${DOCKER_REGISTRY-}codestormcryptotraderbotservice
+    build:
+      context: .
+      dockerfile: CodeStorm.CryptoTrader.BotService/Dockerfile
+
+  codestorm.cryptotrader.database:
+    image: postgres:16
+    container_name: cryptotrader_db
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./.containers/devicehub-db:/var/lib/postgresql/data
+      - /logs:/logs
+    ports:
+      - 5432:5432

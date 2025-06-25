@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeStorm.CryptoTrader.BotService", "CodeStorm.CryptoTrader.BotService\CodeStorm.CryptoTrader.BotService.csproj", "{7B32A011-5049-4830-8B48-B5ABECE3808A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02_LongRunningServices", "02_LongRunningServices", "{7628A94F-C09F-4B5D-96A4-B093B6B1D14C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeStorm.CryptoTrader.Repository", "CodeStorm.CryptoTrader.Repository\CodeStorm.CryptoTrader.Repository.csproj", "{48083654-23FD-4E4D-ABF2-33E2E4EC1397}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01_Domain", "01_Domain", "{3263AB04-8816-4A9A-9D2B-8147E4A32275}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeStorm.CryptoTrader.Application", "CodeStorm.CryptoTrader.Application\CodeStorm.CryptoTrader.Application.csproj", "{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03_Containers", "03_Containers", "{7F1B1362-E668-4BB4-9C48-32883072DDAC}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{28F62917-97BB-4288-820F-BDDBD5C3B5F7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B32A011-5049-4830-8B48-B5ABECE3808A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B32A011-5049-4830-8B48-B5ABECE3808A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B32A011-5049-4830-8B48-B5ABECE3808A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B32A011-5049-4830-8B48-B5ABECE3808A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48083654-23FD-4E4D-ABF2-33E2E4EC1397}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48083654-23FD-4E4D-ABF2-33E2E4EC1397}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48083654-23FD-4E4D-ABF2-33E2E4EC1397}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48083654-23FD-4E4D-ABF2-33E2E4EC1397}.Release|Any CPU.Build.0 = Release|Any CPU
+		{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28F62917-97BB-4288-820F-BDDBD5C3B5F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28F62917-97BB-4288-820F-BDDBD5C3B5F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28F62917-97BB-4288-820F-BDDBD5C3B5F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28F62917-97BB-4288-820F-BDDBD5C3B5F7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7B32A011-5049-4830-8B48-B5ABECE3808A} = {7628A94F-C09F-4B5D-96A4-B093B6B1D14C}
+		{48083654-23FD-4E4D-ABF2-33E2E4EC1397} = {3263AB04-8816-4A9A-9D2B-8147E4A32275}
+		{832ADB92-1A6A-4A2F-96D6-D3C00E36D75B} = {3263AB04-8816-4A9A-9D2B-8147E4A32275}
+		{28F62917-97BB-4288-820F-BDDBD5C3B5F7} = {7F1B1362-E668-4BB4-9C48-32883072DDAC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {05C7A15B-2053-4284-8463-D05A6FC5B873}
+	EndGlobalSection
+EndGlobal
