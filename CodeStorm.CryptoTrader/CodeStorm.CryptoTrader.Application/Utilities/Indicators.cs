@@ -164,6 +164,84 @@
             return new Tuple<decimal?, decimal?> (percentK.LastOrDefault() * 100, percentD.LastOrDefault() * 100); // Or return a tuple of %K and %D if you want
         }
 
+        public static List<decimal?> CalculateEMA(List<decimal> prices, int period)
+        {
+            var ema = new List<decimal?>();
+            decimal multiplier = 2m / (period + 1);
+            decimal? previousEma = null;
+
+            for (int i = 0; i < prices.Count; i++)
+            {
+                if (i < period - 1)
+                {
+                    ema.Add(null);
+                    continue;
+                }
+                if (i == period - 1)
+                {
+                    decimal sma = prices.GetRange(0, period).Average();
+                    ema.Add(sma);
+                    previousEma = sma;
+                }
+                else
+                {
+                    decimal newEma = ((prices[i] - previousEma.Value) * multiplier) + previousEma.Value;
+                    ema.Add(newEma);
+                    previousEma = newEma;
+                }
+            }
+
+            return ema;
+        }
+
+        public static (List<decimal?> stochK, List<decimal?> stochD) CalculateStochasticRSI(List<decimal> closes, int rsiPeriod = 14, int stochPeriod = 14, int kSmooth = 3, int dSmooth = 3)
+        {
+            var rsi = CalculateRSI(closes, rsiPeriod);
+            var stochK = new List<decimal?>();
+            var stochD = new List<decimal?>();
+
+            for (int i = 0; i < rsi.Count; i++)
+            {
+                if (i < stochPeriod + rsiPeriod - 1 || !rsi[i].HasValue)
+                {
+                    stochK.Add(null);
+                    continue;
+                }
+
+                var rsiSlice = rsi.Skip(i - stochPeriod + 1).Take(stochPeriod).Where(v => v.HasValue).Select(v => v.Value).ToList();
+                decimal minRsi = rsiSlice.Min();
+                decimal maxRsi = rsiSlice.Max();
+
+                decimal k = (maxRsi - minRsi == 0) ? 0 : (rsi[i].Value - minRsi) / (maxRsi - minRsi) * 100;
+                stochK.Add(k);
+            }
+
+            // Smooth %K
+            var smoothedK = Smooth(stochK, kSmooth);
+            var smoothedD = Smooth(smoothedK, dSmooth);
+
+            return (smoothedK, smoothedD);
+        }
+
+        // Calculates Simple Moving Average (SMA) smoothing
+        private static List<decimal?> Smooth(List<decimal?> input, int period)
+        {
+            var result = new List<decimal?>();
+
+            for (int i = 0; i < input.Count; i++)
+            {
+                if (i < period - 1 || input.Skip(i - period + 1).Take(period).Any(v => !v.HasValue))
+                {
+                    result.Add(null);
+                    continue;
+                }
+
+                decimal avg = input.Skip(i - period + 1).Take(period).Select(v => v.Value).Average();
+                result.Add(avg);
+            }
+
+            return result;
+        }
     }
 
     public class StochRsiResult

@@ -2,6 +2,7 @@
 using CodeStorm.CryptoTrader.Repository.Repository;
 using Newtonsoft.Json;
 using System.Globalization;
+using System.Text.Json;
 
 namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 {
@@ -9,15 +10,18 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
     {
         private readonly ResponseRepository _responseRepository;
         private readonly TimelineAnalysisRepository _timelineAnalysisRepository;
+        private readonly ActionSignalRepository _actionSignalRepository;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public RealTimeIndicatorService(ResponseRepository responseRepository,
             TimelineAnalysisRepository timelineAnalysisRepository,
+            ActionSignalRepository actionSignalRepository,
             IHttpClientFactory httpClientFactory) 
         { 
             _responseRepository = responseRepository;
             _httpClientFactory = httpClientFactory;
             _timelineAnalysisRepository = timelineAnalysisRepository;
+            _actionSignalRepository = actionSignalRepository;
         }
 
         public async Task GetLatestOHLCForFwog()
@@ -59,8 +63,11 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                         closePrices.Add(Convert.ToDecimal(ohlc[4], CultureInfo.InvariantCulture)); // Close price is at index 4
                     }
 
-                    var latestRsi = Indicators.CalculateLatestRSIWithWilderSmoothing(closePrices);
+                    var latestRsi = Indicators.CalculateLatestRSI(closePrices.ToList());
                     Console.WriteLine($"Latest RSI: {latestRsi}");
+
+                    var latestRsiWilderSmoothing = Indicators.CalculateLatestRSIWithWilderSmoothing(closePrices);
+                    Console.WriteLine($"Latest Wilder Smoothing RSI: {latestRsiWilderSmoothing}");
 
                     var rsi = Indicators.CalculateRSI(closePrices.ToList());
                     var stohasticRsi = Indicators.CalculateStochRSI(rsi);
@@ -69,16 +76,85 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                     Console.WriteLine($"%K (blue): {stohasticRsi.Item1:F2}");
                     Console.WriteLine($"%D (orange): {stohasticRsi.Item2:F2}");
 
+                    //DowntrendDetector
+                    var isDowntrend = DowntrendDetector.IsDowntrend(closePrices);
+                    Console.WriteLine($"Is down trend {isDowntrend}");
+
+                    // Buy signal detector
+                    var ema9 = Indicators.CalculateEMA(closePrices, 9);
+                    var ema21 = Indicators.CalculateEMA(closePrices, 21);
+                    var (stochK, stochD) = Indicators.CalculateStochasticRSI(closePrices);
+
+                    var isBuySignal = BuySignalDetector.IsBuySignal(closePrices,
+                        ema9?.Select(e => e ?? 0).ToList(),
+                        ema21?.Select(e => e ?? 0).ToList(),
+                        rsi,
+                        stochK,
+                        stochD);
+
+                    Console.WriteLine($"Is buy signal: {isBuySignal}");
+
+                    var isSellSignal = SellSignalDetector.IsSellSignal(closePrices,
+                        ema9?.Select(e => e ?? 0).ToList(),
+                        ema21?.Select(e => e ?? 0).ToList(),
+                        rsi,
+                        stochK,
+                        stochD);
+
+                    Console.WriteLine($"Is sell signal: {isSellSignal}");
+
                     await _timelineAnalysisRepository.AddCurrentAnalysis(CryptoCurrencyType.FWOGUSD.ToString(),
                         latestRsi ?? 0,
                         k: stohasticRsi.Item1 ?? 0,
                         d: stohasticRsi.Item2 ?? 0);
+
+                    if (isBuySignal) 
+                    {
+                        var buyResponse = await GetExecutionPriceAsync(CryptoCurrencyType.FWOGUSD.ToString(), true);
+
+                        await _actionSignalRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
+                            "Buy",
+                            buyResponse,
+                            latestRsi ?? 0,
+                            stohasticRsi.Item1 ?? 0,
+                            stohasticRsi.Item2 ?? 0);
+                    }
+
+                    if (isSellSignal)
+                    {
+                        var sellResponse = await GetExecutionPriceAsync(CryptoCurrencyType.FWOGUSD.ToString(), false);
+
+                        await _actionSignalRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
+                            "Sell",
+                            sellResponse,
+                            latestRsi ?? 0,
+                            stohasticRsi.Item1 ?? 0,
+                            stohasticRsi.Item2 ?? 0);
+                    }
 
                     //await _responseRepository.AddResponse(jsonResponse);
                 }
             }
         }
 
+        public async Task<decimal> GetExecutionPriceAsync(string pair, bool isBuy)
+        {
+            using var client = new HttpClient();
+            var url = $"https://api.kraken.com/0/public/Ticker?pair={pair}";
+            var response = await client.GetStringAsync(url);
+
+            var json = JsonDocument.Parse(response);
+            var result = json.RootElement.GetProperty("result");
+            var pairKey = result.EnumerateObject().First().Name;
+            var pairData = result.GetProperty(pairKey);
+
+            // Choose "a" (ask) for buy, "b" (bid) for sell
+            string priceStr = isBuy
+                ? pairData.GetProperty("a")[0].GetString()
+                : pairData.GetProperty("b")[0].GetString();
+
+            return decimal.Parse(priceStr, CultureInfo.InvariantCulture);
+        }
         public class KrakenResponse
         {
             [JsonProperty("error")]
