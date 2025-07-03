@@ -1,5 +1,4 @@
-﻿using CodeStorm.CryptoTrader.Repository.DbEntities;
-using DataFetcher.Repository;
+﻿using DataFetcher.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeStorm.CryptoTrader.Repository.DatabaseContext
@@ -29,11 +28,18 @@ namespace CodeStorm.CryptoTrader.Repository.DatabaseContext
             modelBuilder.Entity<ActionSignal>().Property(p => p.K).HasPrecision(10, 2);
             modelBuilder.Entity<ActionSignal>().Property(p => p.D).HasPrecision(10, 2);
             modelBuilder.Entity<ActionSignal>().Property(p => p.Price).HasPrecision(10, 6);
+
+
+            modelBuilder.Entity<ExecutedAction>().Property(p => p.K).HasPrecision(10, 2);
+            modelBuilder.Entity<ExecutedAction>().Property(p => p.D).HasPrecision(10, 2);
+            modelBuilder.Entity<ExecutedAction>().Property(p => p.Price).HasPrecision(10, 6);
         }
 
         public virtual DbSet<Response> Response { get; set; }
         public virtual DbSet<Ohlc> Ohlcs { get; set; }
         public virtual DbSet<TimelineAnalysis> TimelineAnalysis { get; set; }
         public virtual DbSet<ActionSignal> ActionSignals { get; set; }
+
+        public virtual DbSet<ExecutedAction> ExecutedActions { get; set; }
     }
 }

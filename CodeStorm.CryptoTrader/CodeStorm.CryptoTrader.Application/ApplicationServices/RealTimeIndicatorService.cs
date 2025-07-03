@@ -11,17 +11,20 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
         private readonly ResponseRepository _responseRepository;
         private readonly TimelineAnalysisRepository _timelineAnalysisRepository;
         private readonly ActionSignalRepository _actionSignalRepository;
+        private readonly ExecutedActionRepository _executedActionRepository;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public RealTimeIndicatorService(ResponseRepository responseRepository,
             TimelineAnalysisRepository timelineAnalysisRepository,
             ActionSignalRepository actionSignalRepository,
+            ExecutedActionRepository executedActionRepository,
             IHttpClientFactory httpClientFactory) 
         { 
             _responseRepository = responseRepository;
             _httpClientFactory = httpClientFactory;
             _timelineAnalysisRepository = timelineAnalysisRepository;
             _actionSignalRepository = actionSignalRepository;
+            _executedActionRepository = executedActionRepository;
         }
 
         public async Task GetLatestOHLCForFwog()
@@ -103,10 +106,10 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
                     Console.WriteLine($"Is sell signal: {isSellSignal}");
 
-                    await _timelineAnalysisRepository.AddCurrentAnalysis(CryptoCurrencyType.FWOGUSD.ToString(),
+                    /*await _timelineAnalysisRepository.AddCurrentAnalysis(CryptoCurrencyType.FWOGUSD.ToString(),
                         latestRsi ?? 0,
                         k: stohasticRsi.Item1 ?? 0,
-                        d: stohasticRsi.Item2 ?? 0);
+                        d: stohasticRsi.Item2 ?? 0);*/
 
                     if (isBuySignal) 
                     {
@@ -118,6 +121,23 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                             latestRsi ?? 0,
                             stohasticRsi.Item1 ?? 0,
                             stohasticRsi.Item2 ?? 0);
+
+                        var latestExecutedAction = await _executedActionRepository.GetLatestAction();
+
+                        if (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
+                                && Enum.TryParse(typeof(ExecutedActionType), latestExecutedAction.ExecutedActionType, out var executedActionType)
+                                && (ExecutedActionType)executedActionType == ExecutedActionType.Sell)
+                        {
+                            await _executedActionRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
+                                ExecutedActionType.Buy.ToString(),
+                                string.Empty,
+                                true,
+                                true,
+                                buyResponse,
+                                latestRsi ?? 0,
+                                stohasticRsi.Item1 ?? 0,
+                                stohasticRsi.Item2 ?? 0);
+                        }
                     }
 
                     if (isSellSignal)
@@ -130,6 +150,23 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                             latestRsi ?? 0,
                             stohasticRsi.Item1 ?? 0,
                             stohasticRsi.Item2 ?? 0);
+
+                        var latestExecutedAction = await _executedActionRepository.GetLatestAction();
+
+                        if (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
+                                && Enum.TryParse(typeof(ExecutedActionType), latestExecutedAction.ExecutedActionType, out var executedActionType)
+                                && (ExecutedActionType)executedActionType == ExecutedActionType.Buy)
+                        {
+                            await _executedActionRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
+                                ExecutedActionType.Sell.ToString(),
+                                string.Empty,
+                                true,
+                                true,
+                                sellResponse,
+                                latestRsi ?? 0,
+                                stohasticRsi.Item1 ?? 0,
+                                stohasticRsi.Item2 ?? 0);
+                        }
                     }
 
                     //await _responseRepository.AddResponse(jsonResponse);
