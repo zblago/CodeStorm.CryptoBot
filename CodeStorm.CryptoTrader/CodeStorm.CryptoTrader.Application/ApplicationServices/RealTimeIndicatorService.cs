@@ -124,9 +124,9 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
                         var latestExecutedAction = await _executedActionRepository.GetLatestAction();
 
-                        if (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
+                        if (latestExecutedAction == null || (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
                                 && Enum.TryParse(typeof(ExecutedActionType), latestExecutedAction.ExecutedActionType, out var executedActionType)
-                                && (ExecutedActionType)executedActionType == ExecutedActionType.Sell)
+                                && (ExecutedActionType)executedActionType == ExecutedActionType.Sell))
                         {
                             await _executedActionRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
                                 ExecutedActionType.Buy.ToString(),
@@ -153,9 +153,9 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
                         var latestExecutedAction = await _executedActionRepository.GetLatestAction();
 
-                        if (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
+                        if (latestExecutedAction == null || (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
                                 && Enum.TryParse(typeof(ExecutedActionType), latestExecutedAction.ExecutedActionType, out var executedActionType)
-                                && (ExecutedActionType)executedActionType == ExecutedActionType.Buy)
+                                && (ExecutedActionType)executedActionType == ExecutedActionType.Buy))
                         {
                             await _executedActionRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
                                 ExecutedActionType.Sell.ToString(),
