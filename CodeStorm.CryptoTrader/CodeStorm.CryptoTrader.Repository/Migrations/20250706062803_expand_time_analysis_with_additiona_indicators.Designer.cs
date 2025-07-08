@@ -3,6 +3,7 @@ using System;
 using CodeStorm.CryptoTrader.Repository.DatabaseContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CodeStorm.CryptoTrader.Repository.Migrations
 {
     [DbContext(typeof(CryptoTraderDbContext))]
-    partial class CryptoTraderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250706062803_expand_time_analysis_with_additiona_indicators")]
+    partial class expand_time_analysis_with_additiona_indicators
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

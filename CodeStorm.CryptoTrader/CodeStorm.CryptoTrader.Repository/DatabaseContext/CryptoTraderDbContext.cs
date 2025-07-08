@@ -24,11 +24,14 @@ namespace CodeStorm.CryptoTrader.Repository.DatabaseContext
 
             modelBuilder.Entity<TimelineAnalysis>().Property(p => p.K).HasPrecision(10, 2);
             modelBuilder.Entity<TimelineAnalysis>().Property(p => p.D).HasPrecision(10, 2);
+            modelBuilder.Entity<TimelineAnalysis>().Property(p => p.CurrentRSI).HasPrecision(10, 2);
+            modelBuilder.Entity<TimelineAnalysis>().Property(p => p.PrevRSI).HasPrecision(10, 2);
+            modelBuilder.Entity<TimelineAnalysis>().Property(p => p.CurrentEma9).HasPrecision(10, 2);
+            modelBuilder.Entity<TimelineAnalysis>().Property(p => p.CurrentEma21).HasPrecision(10, 2);    
 
             modelBuilder.Entity<ActionSignal>().Property(p => p.K).HasPrecision(10, 2);
             modelBuilder.Entity<ActionSignal>().Property(p => p.D).HasPrecision(10, 2);
             modelBuilder.Entity<ActionSignal>().Property(p => p.Price).HasPrecision(10, 6);
-
 
             modelBuilder.Entity<ExecutedAction>().Property(p => p.K).HasPrecision(10, 2);
             modelBuilder.Entity<ExecutedAction>().Property(p => p.D).HasPrecision(10, 2);

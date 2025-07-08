@@ -1,6 +1,7 @@
 ﻿using CodeStorm.CryptoTrader.Repository.DatabaseContext;
 using DataFetcher.Repository;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace CodeStorm.CryptoTrader.Repository.Repository
 {
@@ -17,7 +18,11 @@ namespace CodeStorm.CryptoTrader.Repository.Repository
         public async Task AddCurrentAnalysis(string cryptCurrencyType,
             decimal latestRsi,
             decimal k,
-            decimal d)
+            decimal d,
+            decimal currentRSI,
+            decimal prevRSI,
+            decimal currentEma9,
+            decimal currentEma21)
         {
             _cryptoTraderDbContext.Add(new TimelineAnalysis
             {
@@ -25,6 +30,10 @@ namespace CodeStorm.CryptoTrader.Repository.Repository
                 CryptoCurrencyType = cryptCurrencyType,
                 K = k,
                 D = d,
+                CurrentRSI = currentRSI,
+                PrevRSI = prevRSI,
+                CurrentEma9 = currentEma9,
+                CurrentEma21 = currentEma21,
                 CreatedOnUtC = DateTime.UtcNow
             });
 

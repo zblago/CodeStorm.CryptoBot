@@ -3,38 +3,34 @@
     public class BuySignalDetector
     {
         public static bool IsBuySignal(
-            List<decimal> closePrices,
+            List<decimal> closes,
             List<decimal> ema9,
             List<decimal> ema21,
-            List<decimal?> rsi14,
-            List<decimal?> stochRsiK,
-            List<decimal?> stochRsiD)
+            List<decimal?> rsi,
+            List<decimal?> stochK,
+            List<decimal?> stochD)
         {
-            int i = closePrices.Count - 1;
-
-            // Basic sanity checks
-            if (i < 1 ||
-                ema9.Count <= i ||
-                ema21.Count <= i ||
-                rsi14.Count <= i ||
-                stochRsiK.Count <= i ||
-                stochRsiD.Count <= i)
+            int last = closes.Count - 1;
+            if (last < 1 || ema9.Count != closes.Count || ema21.Count != closes.Count)
                 return false;
 
-            // Trend filter: EMA 9 > EMA 21
-            bool isUptrend = ema9[i] > ema21[i];
+            // Safety checks
+            if (!rsi[last].HasValue || !rsi[last - 1].HasValue || !stochK[last].HasValue || !stochK[last - 1].HasValue)
+                return false;
 
-            // RSI filter: RSI > 50
-            bool rsiHealthy = rsi14[i].HasValue && rsi14[i] > 50;
+            decimal currentRSI = rsi[last].Value;
+            decimal prevRSI = rsi[last - 1].Value;
+            decimal currentStochK = stochK[last].Value;
+            decimal prevStochK = stochK[last - 1].Value;
+            decimal currentEma9 = ema9[last];
+            decimal currentEma21 = ema21[last];
 
-            // Stoch RSI cross from below 20
-            bool stochRsiCrossUp =
-                stochRsiK[i - 1] < stochRsiD[i - 1] &&
-                stochRsiK[i] > stochRsiD[i] &&
-                stochRsiK[i - 1] < 20 && stochRsiD[i - 1] < 20;
+            // Updated conditions:
+            bool stochCrossUp = prevStochK < 20 && currentStochK > 20;
+            bool rsiRising = currentRSI > prevRSI;
+            bool emaUpTrend = currentEma9 > currentEma21;
 
-            return isUptrend && rsiHealthy && stochRsiCrossUp;
+            return stochCrossUp;// && rsiRising;// && emaUpTrend;
         }
     }
-
 }

@@ -30,7 +30,7 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
         public async Task GetLatestOHLCForFwog()
         {
             var httpRequestMessage = new HttpRequestMessage
-                (HttpMethod.Get, $"https://api.kraken.com/0/public/OHLC?pair={CryptoCurrencyType.FWOGUSD }&interval=15");
+                (HttpMethod.Get, $"https://api.kraken.com/0/public/OHLC?pair={CryptoCurrencyType.FWOGUSD}&interval=15");
 
             var httpClient = _httpClientFactory.CreateClient();
             var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
@@ -106,10 +106,19 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
                     Console.WriteLine($"Is sell signal: {isSellSignal}");
 
+                    var sellSignalResponse = SellSignalDetector.GetIndicators(closePrices,
+                        ema9?.Select(e => e ?? 0).ToList(),
+                        ema21?.Select(e => e ?? 0).ToList(),
+                        rsi);
+
                     /*await _timelineAnalysisRepository.AddCurrentAnalysis(CryptoCurrencyType.FWOGUSD.ToString(),
                         latestRsi ?? 0,
                         k: stohasticRsi.Item1 ?? 0,
-                        d: stohasticRsi.Item2 ?? 0);*/
+                        d: stohasticRsi.Item2 ?? 0,
+                        sellSignalResponse.currentRSI,
+                        sellSignalResponse.prevRSI,
+                        sellSignalResponse.currentEma9,
+                        sellSignalResponse.currentEma21);*/
 
                     if (isBuySignal) 
                     {
@@ -155,7 +164,7 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
                         if (latestExecutedAction == null || (latestExecutedAction != null && latestExecutedAction.IsSuccessfull
                                 && Enum.TryParse(typeof(ExecutedActionType), latestExecutedAction.ExecutedActionType, out var executedActionType)
-                                && (ExecutedActionType)executedActionType == ExecutedActionType.Buy))
+                                && (ExecutedActionType)executedActionType == ExecutedActionType.Buy && latestExecutedAction.Price < sellResponse))
                         {
                             await _executedActionRepository.AddAction(CryptoCurrencyType.FWOGUSD.ToString(),
                                 ExecutedActionType.Sell.ToString(),
@@ -168,8 +177,6 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                                 stohasticRsi.Item2 ?? 0);
                         }
                     }
-
-                    //await _responseRepository.AddResponse(jsonResponse);
                 }
             }
         }
@@ -192,6 +199,7 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
 
             return decimal.Parse(priceStr, CultureInfo.InvariantCulture);
         }
+
         public class KrakenResponse
         {
             [JsonProperty("error")]

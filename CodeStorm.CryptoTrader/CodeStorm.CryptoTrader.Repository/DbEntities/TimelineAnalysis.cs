@@ -13,6 +13,11 @@ namespace DataFetcher.Repository
         public decimal K { get; set; }
         public decimal D { get; set; }
 
+        public decimal CurrentRSI { get; set; }
+        public decimal PrevRSI { get; set; }
+        public decimal CurrentEma9 { get; set; }
+        public decimal CurrentEma21 { get; set; }
+
         public DateTime CreatedOnUtC { get; set; }        
     }
 }

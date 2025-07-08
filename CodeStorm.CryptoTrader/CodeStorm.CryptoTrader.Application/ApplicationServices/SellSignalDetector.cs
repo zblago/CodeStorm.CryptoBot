@@ -15,11 +15,12 @@
                 return false;
 
             // Safety null check
-            if (!rsi[last].HasValue || !stochK[last].HasValue || !stochK[last - 1].HasValue)
+            if (!rsi[last].HasValue || !rsi[last - 1].HasValue || !stochK[last].HasValue || !stochK[last - 1].HasValue)
                 return false;
 
             // Indicator values
             decimal currentRSI = rsi[last].Value;
+            decimal prevRSI = rsi[last - 1].Value;
             decimal currentStochK = stochK[last].Value;
             decimal prevStochK = stochK[last - 1].Value;
 
@@ -27,11 +28,24 @@
             decimal currentEma21 = ema21[last];
 
             // Sell signal logic:
-            bool rsiWeak = currentRSI < 50;
-            bool stochKOverboughtCrossDown = prevStochK > 80 && currentStochK < 80;
+            bool stochCrossDown = prevStochK > 80 && currentStochK < 80;
+            bool rsiFalling = currentRSI < prevRSI;
             bool emaBearish = currentEma9 < currentEma21;
 
-            return rsiWeak && stochKOverboughtCrossDown && emaBearish;
+            return stochCrossDown;// && rsiFalling;// && emaBearish;
+        }
+
+        public static (decimal currentEma9, decimal currentEma21, decimal currentRSI, decimal prevRSI) 
+            GetIndicators(List<decimal> closes, List<decimal> ema9, List<decimal> ema21,List<decimal?> rsi)
+        {
+            int last = closes.Count - 1;
+
+            decimal currentEma9 = ema9[last];
+            decimal currentEma21 = ema21[last];
+            decimal currentRSI = rsi[last].Value;
+            decimal prevRSI = rsi[last - 1].Value;
+
+            return (currentEma9, currentEma21, currentRSI, prevRSI);
         }
     }
 }
