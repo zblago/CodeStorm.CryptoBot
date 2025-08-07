@@ -2,6 +2,8 @@
 using CodeStorm.CryptoTrader.Repository.Repository;
 using Newtonsoft.Json;
 using System.Globalization;
+using System.Net.Mail;
+using System.Net;
 using System.Text.Json;
 
 namespace CodeStorm.CryptoTrader.Application.ApplicationServices
@@ -12,12 +14,14 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
         private readonly TimelineAnalysisRepository _timelineAnalysisRepository;
         private readonly ActionSignalRepository _actionSignalRepository;
         private readonly ExecutedActionRepository _executedActionRepository;
+        private readonly KrakenTradingService _krakenTradingService;
         private readonly IHttpClientFactory _httpClientFactory;
 
         public RealTimeIndicatorService(ResponseRepository responseRepository,
             TimelineAnalysisRepository timelineAnalysisRepository,
             ActionSignalRepository actionSignalRepository,
             ExecutedActionRepository executedActionRepository,
+            KrakenTradingService krakenTradingService,
             IHttpClientFactory httpClientFactory) 
         { 
             _responseRepository = responseRepository;
@@ -25,6 +29,7 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
             _timelineAnalysisRepository = timelineAnalysisRepository;
             _actionSignalRepository = actionSignalRepository;
             _executedActionRepository = executedActionRepository;
+            _krakenTradingService = krakenTradingService;
         }
 
         public async Task GetLatestOHLCForFwog()
@@ -146,6 +151,20 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                                 latestRsi ?? 0,
                                 stohasticRsi.Item1 ?? 0,
                                 stohasticRsi.Item2 ?? 0);
+
+                            var smtpClient = new SmtpClient("smtp.gmail.com")
+                            {
+                                Port = 587,
+                                Credentials = new NetworkCredential("mjesanac@gmail.com", "siws fxqd zzhs ctmx"),
+                                EnableSsl = true,
+                            };
+
+                            await _krakenTradingService.CancelOpenOrdersAsync(CryptoCurrencyType.FWOGUSD.ToString());
+
+                            await _krakenTradingService.ExecuteLimitBuyAsync(CryptoCurrencyType.FWOGUSD.ToString(), buyResponse);
+
+                            smtpClient.Send("mjesanac@gmail.com", "blzoran@gmail.com", "Buy signal",
+                                $"This is {CryptoCurrencyType.FWOGUSD.ToString()} buy signal FROM PC, price {buyResponse}");
                         }
                     }
 
@@ -175,6 +194,18 @@ namespace CodeStorm.CryptoTrader.Application.ApplicationServices
                                 latestRsi ?? 0,
                                 stohasticRsi.Item1 ?? 0,
                                 stohasticRsi.Item2 ?? 0);
+
+                            var smtpClient = new SmtpClient("smtp.gmail.com")
+                            {
+                                Port = 587,
+                                Credentials = new NetworkCredential("mjesanac@gmail.com", "siws fxqd zzhs ctmx"),
+                                EnableSsl = true,
+                            };
+
+                            await _krakenTradingService.ExecuteLimitSellAsync(CryptoCurrencyType.FWOGUSD.ToString(), sellResponse);
+
+                            smtpClient.Send("mjesanac@gmail.com", "blzoran@gmail.com", "Sell signal", 
+                                $"This is {CryptoCurrencyType.FWOGUSD.ToString()} sell signal FROM PC, price {sellResponse}");
                         }
                     }
                 }

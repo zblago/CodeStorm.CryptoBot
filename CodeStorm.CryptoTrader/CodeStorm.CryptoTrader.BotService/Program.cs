@@ -12,6 +12,7 @@ builder.Services.AddScoped<ActionSignalRepository>();
 builder.Services.AddScoped<ExecutedActionRepository>();
 builder.Services.AddScoped<RealTimeIndicatorService>();
 builder.Services.AddScoped<CryptoTraderDbContext>();
+builder.Services.AddScoped<KrakenTradingService>();
 builder.Services.AddHttpClient();
 
 builder.Services.AddHostedService<Worker>();
